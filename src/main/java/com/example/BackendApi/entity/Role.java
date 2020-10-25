@@ -1,9 +1,11 @@
 package com.example.BackendApi.entity;
 
-import com.example.BackendApi.logic.Permission;
+import com.example.BackendApi.repository.Permission;
+import com.example.BackendApi.repository.RoleName;
 import com.sun.istack.NotNull;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,35 +13,45 @@ import java.util.Objects;
 @Table(name = "role")
 public class Role {
 
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long role_id;
 
     @NotNull
-    private String rolename;
+    @Enumerated(value = EnumType.STRING)
+    private RoleName role_name;
 
-    private List<Permission> permissionList;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "role", joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "id"))
-    public List<Permission> getRoleList() {
-        return this.permissionList;
+    public Long getRole_id() {
+        return role_id;
     }
 
-    public Long getId() {
-        return id;
+    public RoleName getRole_name() {
+        return role_name;
     }
 
-    public String getRolename() {
-        return rolename;
+    public void setRole_name(RoleName role_name) {
+        this.role_name = role_name;
     }
 
-    public void setRolename(String rolename) {
-        this.rolename = rolename;
+    @ManyToMany(mappedBy = "roles")
+    private List<User> userList = new ArrayList<>();
+
+
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "permission_list",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    private List<Permission> permissions;
+
+    public List<User> getList() {
+        return this.userList;
     }
 
-    public void setPermissionList(List<Permission> permissionList) {
-        this.permissionList = permissionList;
+    public List<Permission> getPermissions() {
+        return this.permissions;
     }
 
     @Override
@@ -47,22 +59,22 @@ public class Role {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return Objects.equals(id, role.id) &&
-                Objects.equals(rolename, role.rolename) &&
-                Objects.equals(permissionList, role.permissionList);
+        return Objects.equals(role_id, role.role_id) &&
+                Objects.equals(role_name, role.role_name) &&
+                Objects.equals(permissions, role.permissions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, rolename, permissionList);
+        return Objects.hash(role_id, role_name, permissions);
     }
 
     @Override
     public String toString() {
         return "Role{" +
-                "id=" + id +
-                ", rolename='" + rolename + '\'' +
-                ", permissionList=" + permissionList +
+                "id=" + role_id +
+                ", rolename='" + role_name + '\'' +
+                ", permissionList=" + permissions +
                 '}';
     }
 }
