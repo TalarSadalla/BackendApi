@@ -1,7 +1,9 @@
 package com.example.BackendApi.entity;
+
 import com.sun.istack.NotNull;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,25 +11,26 @@ import java.util.Objects;
 @Table(name = "user")
 public class User {
 
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long user_id;
 
     @NotNull
     private String username;
     @NotNull
     private String password;
 
-    private List<Role> role;
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "role_list",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<Role> roles = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "role", joinColumns = @JoinColumn(name = "id"), inverseJoinColumns = @JoinColumn(name = "id"))
-    public List<Role> getRoleList() {
-        return this.role;
-    }
-
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return user_id;
     }
 
     public String getUsername() {
@@ -46,8 +49,12 @@ public class User {
         this.password = password;
     }
 
-    public void setRole(List<Role> role) {
-        this.role = role;
+    public List<Role> getRoles() {
+        return this.roles;
+    }
+
+    public void setRole(List<Role> roles) {
+        this.roles = roles;
     }
 
     @Override
@@ -55,24 +62,24 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) &&
+        return Objects.equals(user_id, user.user_id) &&
                 Objects.equals(username, user.username) &&
                 Objects.equals(password, user.password) &&
-                Objects.equals(role, user.role);
+                Objects.equals(roles, user.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, password, role);
+        return Objects.hash(user_id, username, password, roles);
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "id=" + user_id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", role=" + role +
+                ", role=" + roles +
                 '}';
     }
 }
