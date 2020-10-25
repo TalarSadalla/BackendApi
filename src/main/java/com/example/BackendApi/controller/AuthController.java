@@ -1,6 +1,7 @@
 package com.example.BackendApi.controller;
 
 import com.example.BackendApi.entity.User;
+import com.example.BackendApi.repository.RoleName;
 import com.example.BackendApi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,8 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.swing.text.html.Option;
 import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -58,6 +61,15 @@ public class AuthController {
             return new ResponseEntity<>("Your password:" + user.getPassword(), HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public boolean isAdmin() {
+        if (!loggedUser.equals(null)) {
+            String user_role = loggedUser.getRole().getRole_name().toString().toUpperCase();
+            return user_role.equals(RoleName.ADMIN.toString().toUpperCase());
+        } else {
+            return false;
         }
     }
 }

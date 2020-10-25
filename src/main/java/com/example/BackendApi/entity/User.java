@@ -22,12 +22,9 @@ public class User {
     @NotNull
     private String password;
 
-    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "role_list",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private List<Role> roles = new ArrayList<>();
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     public Long getUserId() {
         return user_id;
@@ -49,12 +46,12 @@ public class User {
         this.password = password;
     }
 
-    public List<Role> getRoles() {
-        return this.roles;
+    public Role getRole() {
+        return this.role;
     }
 
-    public void setRole(List<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override
@@ -65,12 +62,12 @@ public class User {
         return Objects.equals(user_id, user.user_id) &&
                 Objects.equals(username, user.username) &&
                 Objects.equals(password, user.password) &&
-                Objects.equals(roles, user.roles);
+                Objects.equals(role, user.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user_id, username, password, roles);
+        return Objects.hash(user_id, username, password, role);
     }
 
     @Override
@@ -79,7 +76,7 @@ public class User {
                 "id=" + user_id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", role=" + roles +
+                ", role=" + role +
                 '}';
     }
 }

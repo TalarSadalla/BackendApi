@@ -1,13 +1,11 @@
 package com.example.BackendApi.entity;
 
-import com.example.BackendApi.repository.Permission;
 import com.example.BackendApi.repository.RoleName;
 import com.sun.istack.NotNull;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "role")
@@ -35,23 +33,12 @@ public class Role {
         this.role_name = role_name;
     }
 
-    @ManyToMany(mappedBy = "roles")
-    private List<User> userList = new ArrayList<>();
+    @OneToOne(mappedBy = "role", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY, optional = false)
+    private User user;
 
-
-    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "permission_list",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private List<Permission> permissions;
-
-    public List<User> getList() {
-        return this.userList;
-    }
-
-    public List<Permission> getPermissions() {
-        return this.permissions;
+    public User getUser() {
+        return this.user;
     }
 
     @Override
@@ -60,13 +47,12 @@ public class Role {
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
         return Objects.equals(role_id, role.role_id) &&
-                Objects.equals(role_name, role.role_name) &&
-                Objects.equals(permissions, role.permissions);
+                Objects.equals(role_name, role.role_name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(role_id, role_name, permissions);
+        return Objects.hash(role_id, role_name);
     }
 
     @Override
@@ -74,7 +60,6 @@ public class Role {
         return "Role{" +
                 "id=" + role_id +
                 ", rolename='" + role_name + '\'' +
-                ", permissionList=" + permissions +
                 '}';
     }
 }

@@ -1,7 +1,7 @@
 package com.example.BackendApi.controller;
 
 import com.example.BackendApi.entity.Role;
-import com.example.BackendApi.repository.RoleName;
+import com.example.BackendApi.repository.Permission;
 import com.example.BackendApi.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,9 @@ import java.util.NoSuchElementException;
 @RestController
 public class RoleController {
 
+    @Autowired
     private AuthController authController;
+
 
     @Autowired
     private RoleService roleService;
@@ -26,7 +28,7 @@ public class RoleController {
 
     @GetMapping("/roles/{id}")
     public ResponseEntity<Role> get(@PathVariable Integer id) {
-        if (isAdmin()) {
+        if (authController.isAdmin()) {
             try {
                 Role role = roleService.getRole(id.longValue());
                 return new ResponseEntity<Role>(role, HttpStatus.OK);
@@ -38,20 +40,19 @@ public class RoleController {
         }
     }
 
-    private boolean isAdmin() {
-        return authController.loggedUser.getRoles().contains(RoleName.ADMIN);
-    }
-
     @PostMapping("/roles")
     public void add(@RequestBody Role role) {
-        if (isAdmin()) {
+        Long role_id = authController.loggedUser.getRole().getRole_id();
+        int permission_id = Permission.CREATE_USER.getPermission_id();
+
+        if (authController.isAdmin() && permission_id == role_id.intValue()) {
             roleService.saveRole(role);
         }
     }
 
     @PutMapping("/roles/{id}")
     public ResponseEntity<?> update(@RequestBody Role role, @PathVariable Integer id) {
-        if (isAdmin()) {
+        if (authController.isAdmin()) {
             try {
                 Role existRole = roleService.getRole(id.longValue());
                 roleService.saveRole(existRole);
@@ -60,15 +61,22 @@ public class RoleController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } else {
-            return new ResponseEntity<Role>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("You don't have access", HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/roles/{id}")
-    public void delete(@PathVariable Integer id) {
-        if (isAdmin()) {
-            roleService.deleteRole(id.longValue());
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
+        if (authController.isAdmin()) {
+            try {
+                roleService.deleteRole(id.longValue());
+            } catch (NoSuchElementException e) {
+                return new ResponseEntity<>("No such role id to delete", HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>("You don't have access", HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>("Wrong data", HttpStatus.NOT_FOUND);
     }
 
 }

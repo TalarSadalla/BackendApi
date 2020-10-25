@@ -3,7 +3,6 @@ package com.example.BackendApi.repository;
 import com.example.BackendApi.entity.Role;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "permission")
@@ -23,11 +22,16 @@ public enum Permission {
 
     private String permission_name;
 
-    @ManyToMany(mappedBy = "permissions")
-    private List<Role> roleList;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
-    public List<Role> roleList() {
-        return this.roleList;
+    public Role getRole() {
+        return this.role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     Permission(int permission_id, String permissionType) {
